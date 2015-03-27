@@ -44,7 +44,7 @@ void testApp::initSprites()
             newSprite->animation.frame_duration /= newSprite->speed;
             
             //change the start index of our sprite. we have 4 rows of animations and our spritesheet is 8 tiles wide, so our possible start indicies are 0, 8, 16, and 24
-            newSprite->animation.index = (int)ofRandom(0,10)*10;
+            newSprite->animation.index = (int)ofRandom(0,10)*ofRandom(0,10);
             sprites.push_back(newSprite); //add our sprite to the vector
         }
     
