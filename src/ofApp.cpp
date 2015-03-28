@@ -32,7 +32,7 @@ void testApp::setup(){
     charToIndexMap[')']=9;
     charToIndexMap['*']=10;
     charToIndexMap['+']=11;
-    charToIndexMap['`']=12;
+    charToIndexMap[',']=12;
     charToIndexMap['-']=13;
     charToIndexMap['.']=14;
     charToIndexMap['/']=15;
@@ -84,7 +84,7 @@ void testApp::setup(){
     charToIndexMap[']']=61;
     charToIndexMap['^']=62;
     charToIndexMap['_']=63;
-//    charToIndexMap['\'']=64;
+    charToIndexMap['\'']=64;
     charToIndexMap['a']=65;
     charToIndexMap['b']=66;
     charToIndexMap['c']=67;
@@ -117,7 +117,7 @@ void testApp::setup(){
     charToIndexMap['~']=94;
     
     initSprites();
-//" !\"#$%&'()*+_@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
+//" !\"#$%&'()*+_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
 }
 
 void testApp::initSprites()
@@ -167,6 +167,8 @@ void testApp::update(){
     
     sort( sprites.begin(), sprites.end(), sortVertically ); // sorts the sprites vertically so the ones that are lower are drawn later and there for in front of the ones that are higher up
     
+    string s =           " !\"#$%&'()*+,_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
+    string letterOrder = " .-_':,;^=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
     if(sprites.size()>0) // if we have sprites
     {
         for(int i=sprites.size()-1;i>=0;i--) //go through them
@@ -174,8 +176,8 @@ void testApp::update(){
             ofVec2f movieCoord =ofVec2f(camWidth * sprites[i]->pos.x/ofGetWindowWidth(),
                                         camHeight * sprites[i]->pos.y/ofGetWindowHeight());
             float lightness = pixelsRef.getColor(movieCoord.x, movieCoord.y).getLightness()/ofColor().limit();
-            int charIndex = (int)(lightness*charToIndexMap.size());
-            sprites[i]->animation.index = charToIndexMap[charIndex];
+            int charIndex = (int)(lightness*letterOrder.length());//(int)(lightness*charToIndexMap.size());
+            sprites[i]->animation.index = charToIndexMap[letterOrder[charIndex]];
             // add them to the sprite renderer (add their animation at their position, there are a lot more options for what could
             // happen here, scale, tint, rotation, etc, but the animation, x and y are the only variables that are required)
             // int layer = -1,                        flipDirection f = F_NONE, float scale = 1.0,
