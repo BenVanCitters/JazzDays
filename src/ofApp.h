@@ -56,6 +56,7 @@ public:
     ofTrueTypeFont  font;
     int hCount;
     int vCount;
+    string letterOrder;
 };
 
 #endif
