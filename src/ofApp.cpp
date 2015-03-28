@@ -87,7 +87,7 @@ void testApp::initSprites()
             sprites.push_back(newSprite); //add our sprite to the vector
         }
     }
-    cout << "count: " << charToIndexMap.size() << endl;
+
 }
 
 //--------------------------------------------------------------
@@ -140,14 +140,17 @@ void testApp::update()
                                             sprites[i]->pos.y,-1,F_NONE,.5);
         }
     }
-    cout << "min max: " << minVBright << "," << maxVBright << endl;
+//    cout << "min max: " << minVBright << "," << maxVBright << endl;
 }
 
 //--------------------------------------------------------------
 void testApp::draw()
 {
-    ofBackground(0);
+    ofBackground(255, 0, 0);
     spriteRenderer->draw(); //draw the sprites!
+    
+    spriteRenderer->frameBuffer.draw(0,0);
+
 }
 
 
