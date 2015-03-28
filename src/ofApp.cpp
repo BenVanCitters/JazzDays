@@ -91,27 +91,45 @@ void testApp::initSprites()
 }
 
 //--------------------------------------------------------------
-void testApp::update(){
-    	vidGrabber.update();
+void testApp::update()
+{
+    vidGrabber.update();
     ofPixelsRef pixelsRef = vidGrabber.getPixelsRef();
+    //get min/max of brightness
+    float maxBright = ofColor().limit(); //normalizer for brighness values
+    float minVBright = 999;
+    float maxVBright = -999;
+    for (int i = 0; i < camWidth; i+= 7){
+        for (int j = 0; j < camHeight; j+= 9){
+            // get the pixel and its lightness (lightness is the average of its RGB values)
+            float lightness = pixelsRef.getColor(i,j).getLightness()/maxBright;
+            maxVBright = MAX(maxVBright,lightness);
+            minVBright = MIN(minVBright, lightness);
+        }
+    }
     
     spriteRenderer->clear(); // clear the sheet
     spriteRenderer->update(ofGetElapsedTimeMillis()); //update the time in the renderer, this is necessary for animations to advance
     
     sort( sprites.begin(), sprites.end(), sortVertically ); // sorts the sprites vertically so the ones that are lower are drawn later and there for in front of the ones that are higher up
-
-    
-    int windW =ofGetWindowWidth();
-    int windH =ofGetWindowHeight();
-    float maxBright =ofColor().limit();
+    //cache some vaules we use in the loop
+    int windW = ofGetWindowWidth();
+    int windH = ofGetWindowHeight();
+   
+    float brightDiff = maxVBright-minVBright;
     if(sprites.size()>0) // if we have sprites
     {
         for(int i=sprites.size()-1;i>=0;i--) //go through them
         {
+            //get the brightness of the video input that sits behind this letter
             ofVec2f movieCoord =ofVec2f(camWidth * sprites[i]->pos.x/windW,
                                         camHeight * sprites[i]->pos.y/windH);
             float lightness = pixelsRef.getColor(movieCoord.x, movieCoord.y).getLightness()/maxBright;
-            int charIndex = (int)(lightness*(letterOrder.length()-1));//(int)(lightness*charToIndexMap.size());
+            lightness -= minVBright;
+            lightness *= brightDiff;
+            int charIndex = (int)(lightness*(letterOrder.length()-1));
+            
+            //set the sprite to match the brightness
             sprites[i]->animation.index = charToIndexMap[letterOrder[charIndex]];
             
             // add them to the sprite renderer (add their animation at their position, there are a lot more options for what could
@@ -122,6 +140,7 @@ void testApp::update(){
                                             sprites[i]->pos.y,-1,F_NONE,.5);
         }
     }
+    cout << "min max: " << minVBright << "," << maxVBright << endl;
 }
 
 //--------------------------------------------------------------
