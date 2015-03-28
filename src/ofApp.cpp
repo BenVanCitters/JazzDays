@@ -8,6 +8,10 @@ bool sortVertically(  basicSprite * a, basicSprite * b ) {
 //--------------------------------------------------------------
 void testApp::setup()
 {
+    cout << "AudioShader" << endl;
+    audioShader.load("audioShader.vert", "audioShader.frag", "");
+    audioXAttribLocation = audioShader.getAttributeLocation("texCoordX");
+    audioYAttribLocation = audioShader.getAttributeLocation("texCoordY");
     
     camWidth 		= 640;	// try to grab at this size.
     camHeight 		= 480;
@@ -15,6 +19,7 @@ void testApp::setup()
     vCount = 70;
     
     ofHideCursor();
+    ofEnableNormalizedTexCoords();
     
     vidGrabber.setVerbose(true);
     vidGrabber.initGrabber(camWidth,camHeight);
@@ -50,9 +55,7 @@ void testApp::setup()
     
     initSprites();
     letterOrder = " .-_':,;^~=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
-//" !\"#$%&'()*+_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
-//    string s =         " !\"#$%&'()*+,_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
-//    soundSetup();
+    setupFlagVerts();
 }
 
 void testApp::initSprites()
@@ -140,42 +143,115 @@ void testApp::update()
                                             sprites[i]->pos.y,-1,F_NONE,.5);
         }
     }
-//    cout << "min max: " << minVBright << "," << maxVBright << endl;
 }
 
 //--------------------------------------------------------------
 void testApp::draw()
 {
-    ofBackground(255, 0, 0);
+    ofBackground(0, 0, 0,255);
     spriteRenderer->draw(); //draw the sprites!
     
-    spriteRenderer->frameBuffer.draw(0,0);
+//    spriteRenderer->frameBuffer.draw(0,0);
+//    spriteRenderer->texture->draw(0, 0);
+    
+    int count = spriteRenderer->frameBuffer.getNumTextures();
+    if(count > 0)
+    {
+        audioShader.begin();
+        
+//        ofTexture texRef = spriteRenderer->t;//  //fingerMovie.getTextureReference();
+//        texRef.setTextureWrap(GL_REPEAT, GL_REPEAT);
+        vidGrabber.update();
+        ofTexture texRef = vidGrabber.getTextureReference();
+        texRef.setTextureWrap(GL_REPEAT, GL_REPEAT);
 
+        audioShader.setUniformTexture("mytex",spriteRenderer->frameBuffer.getTextureReference(), 0);
+//        glBindTexture(        audioShader.getAttributeLocation("myTex"), spriteRenderer->frameBuffer.getTextureReference());
+        audioShader.setUniform1f("time", ofGetElapsedTimef());
+        audioStrip.draw(GL_TRIANGLE_STRIP, 0, 6*100*100);
+//        audioStrip.drawElements(GL_TRIANGLE_STRIP, 6*100*100);
+        
+        //ofRect(0,-20, drawWidth/2,100);
+        //ofRect(50,150, drawWidth/2-50,150);
+        audioShader.end();
+    }
 }
 
 
 
 void testApp::soundSetup()
 {
-    soundStream.listDevices();
+//    soundStream.listDevices();
+//    
+//    //if you want to set a different device id
+//    soundStream.setDeviceID(2); //bear in mind the device id corresponds to all audio devices, including  input-only and output-only devices.
+//    int bufferSize = 256;
+//    left.assign(bufferSize*2, 0.0);
+//    soundStream.setup(this, 0, 1, 44100, bufferSize, 1);
     
-    //if you want to set a different device id
-    soundStream.setDeviceID(2); //bear in mind the device id corresponds to all audio devices, including  input-only and output-only devices.
-    int bufferSize = 256;
-    left.assign(bufferSize*2, 0.0);
-    soundStream.setup(this, 0, 1, 44100, bufferSize, 1);
-    audioSamples = new ofVec2f[bufferSize*2];
-    float hSpacing =    ofGetScreenWidth() *1.f/bufferSize;;
+//    audioStrip.setAttributeData(audioAttribLocation, levels, 1,2*bufferSize, GL_DYNAMIC_DRAW);
+}
+
+
+void testApp::setupFlagVerts()
+{
+//    int bufferSize = 256;
     
-    levels = new float[bufferSize*2];
-    for(int i = 0; i < bufferSize; i++)
+    int vertsAcross = 100;
+    int vertsDown = 100;
+    int totalVerts = vertsAcross*vertsDown*6;
+    ofVec3f* flagVerts = new ofVec3f[totalVerts];
+    ofVec2f* flagTexCoords = new ofVec2f[totalVerts];
+    float* flagTexCoordsX = new float[totalVerts*2];
+    float* flagTexCoordsY = new float[totalVerts*2];
+    
+    float hSpacing = ofGetScreenWidth() *1.f/vertsAcross;;
+    float vSpacing = ofGetScreenWidth() *1.f/vertsDown;;
+
+    for(int j = 0; j < vertsDown; j++)
     {
-        audioSamples[2*i] = ofVec2f(i*hSpacing, -150);
-        audioSamples[2*i+1] = ofVec2f(i*hSpacing, 150);
-        levels[2*i] = levels[2*i+1]= ofRandom(-100,100);
+        for(int i = 0; i < vertsAcross; i++)
+        {
+            int curIndex = 6*(i+j*vertsAcross);
+            flagVerts[curIndex+0]     = ofVec3f(i*hSpacing, j*vSpacing,0);
+            flagTexCoords[curIndex+0] = ofVec2f(i*1.f/vertsAcross,j*1.f/vertsDown);
+            flagTexCoordsX[curIndex+0] =i*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+0] =j*1.f/vertsDown;
+            
+            flagVerts[curIndex+1]     = ofVec3f((i+1)*hSpacing, j*vSpacing,0);
+            flagTexCoords[curIndex+1] = ofVec2f((i+1)*1.f/vertsAcross,j*1.f/vertsDown);
+            flagTexCoordsX[curIndex+1] =(i+1)*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+1] =j*1.f/vertsDown;
+
+            
+            flagVerts[curIndex+2]     = ofVec3f((i+1)*hSpacing, (j+1)*vSpacing,0);
+            flagTexCoords[curIndex+2] = ofVec2f((i+1)*1.f/vertsAcross,(j+1)*1.f/vertsDown);
+            flagTexCoordsX[curIndex+2] =(i+1)*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+2] =(j+1)*1.f/vertsDown;
+            
+            flagVerts[curIndex+3]     = ofVec3f(i*hSpacing, j*vSpacing,0);
+            flagTexCoords[curIndex+3] = ofVec2f(i*1.f/vertsAcross,j*1.f/vertsDown);
+            flagTexCoordsX[curIndex+3] =i*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+3] =j*1.f/vertsDown;
+            
+            flagVerts[curIndex+4]     = ofVec3f((i+1)*hSpacing, (j+1)*vSpacing,0);
+            flagTexCoords[curIndex+4] = ofVec2f((i+1)*1.f/vertsAcross,(j+1)*1.f/vertsDown);
+            flagTexCoordsX[curIndex+4] =(i+1)*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+4] =(j+1)*1.f/vertsDown;
+            
+            flagVerts[curIndex+5]     = ofVec3f(i*hSpacing, (j+1)*vSpacing,0);
+            flagTexCoords[curIndex+5] = ofVec2f(i*1.f/vertsAcross,(j+1)*1.f/vertsDown);
+            flagTexCoordsX[curIndex+5] =i*1.f/vertsAcross;
+            flagTexCoordsY[curIndex+5] =(j+1)*1.f/vertsDown;
+        }
     }
-    audioStrip.setVertexData(audioSamples, bufferSize*2, GL_STATIC_DRAW);
-    audioStrip.setAttributeData(audioAttribLocation, levels, 1,2*bufferSize, GL_DYNAMIC_DRAW);
+    audioStrip.setVertexData(flagVerts, totalVerts, GL_STATIC_DRAW);
+    audioStrip.setTexCoordData(flagTexCoords, totalVerts, GL_STATIC_DRAW);
+    audioStrip.setAttributeData(audioXAttribLocation, flagTexCoordsX, 1,totalVerts, GL_STATIC_DRAW);
+    audioStrip.setAttributeData(audioYAttribLocation, flagTexCoordsY, 1,totalVerts, GL_STATIC_DRAW);
+    //clean the arrays up???
+//    delete [] flagVerts;
+//    delete [] flagTexCoords;
 }
 
 void testApp::audioIn(float * input, int bufferSize, int nChannels)

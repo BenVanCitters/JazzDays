@@ -43,7 +43,7 @@ public:
     void mouseReleased(int x, int y, int button);
     void windowResized(int w, int h);
     void initSprites();
-    
+    void setupFlagVerts();
     ofxSpriteSheetRenderer * spriteRenderer;	// our spriteRenderer
     vector<basicSprite *> sprites;				// our vector of sprites
     map<char,int> charToIndexMap;
@@ -59,15 +59,20 @@ public:
     string letterOrder;
     
     
+    ofShader audioShader;
+    
+    ofVbo flagShape;
+    
     ///audio stuff
     void soundSetup();
     void audioIn(float * input, int bufferSize, int nChannels);
     vector <float> left;
-    ofVec2f* audioSamples;
+    
     ofSoundStream soundStream;
     ofVbo audioStrip;
     float* levels;
-    int audioAttribLocation;
+    int audioXAttribLocation;
+    int audioYAttribLocation;
 };
 
 #endif
