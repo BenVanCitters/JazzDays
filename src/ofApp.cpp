@@ -6,17 +6,20 @@ bool sortVertically(  basicSprite * a, basicSprite * b ) {
 }
 
 //--------------------------------------------------------------
-void testApp::setup(){
+void testApp::setup()
+{
     
     camWidth 		= 640;	// try to grab at this size.
     camHeight 		= 480;
     hCount = 100;
     vCount = 70;
     
+    ofHideCursor();
+    
     vidGrabber.setVerbose(true);
     vidGrabber.initGrabber(camWidth,camHeight);
     
-    ofSetFrameRate(30); //lets run at 30 fps!
+    ofSetFrameRate(50); //lets run at 30 fps!
     
     ofEnableAlphaBlending(); // turn on alpha blending. important!
     charToIndexMap.clear();
@@ -49,13 +52,13 @@ void testApp::setup(){
     letterOrder = " .-_':,;^~=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
 //" !\"#$%&'()*+_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
 //    string s =         " !\"#$%&'()*+,_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
-    
+    soundSetup();
 }
 
 void testApp::initSprites()
 {
-    
-    //declare a new renderer with 1 layer, 10000 tiles per layer, default layer of 0, tile size of 32
+    sprites.clear();
+    //declare a new renderer with 1 layer, 10000 tiles per layer, default layer of 0, tile size of 'sidLen'
     float sideLen = 256/10.f;
     spriteRenderer = new ofxSpriteSheetRenderer(1, hCount*vCount, 0, sideLen);
     
@@ -122,14 +125,59 @@ void testApp::update(){
 }
 
 //--------------------------------------------------------------
-void testApp::draw(){
+void testApp::draw()
+{
     ofBackground(0);
     spriteRenderer->draw(); //draw the sprites!
 }
 
-//--------------------------------------------------------------
-void testApp::keyPressed(int key){
+
+
+void testApp::soundSetup()
+{
+    soundStream.listDevices();
     
+    //if you want to set a different device id
+    soundStream.setDeviceID(2); //bear in mind the device id corresponds to all audio devices, including  input-only and output-only devices.
+    int bufferSize = 256;
+    left.assign(bufferSize*2, 0.0);
+    soundStream.setup(this, 0, 1, 44100, bufferSize, 1);
+    audioSamples = new ofVec2f[bufferSize*2];
+    float hSpacing =    ofGetScreenWidth() *1.f/bufferSize;;
+    
+    levels = new float[bufferSize*2];
+    for(int i = 0; i < bufferSize; i++)
+    {
+        audioSamples[2*i] = ofVec2f(i*hSpacing, -150);
+        audioSamples[2*i+1] = ofVec2f(i*hSpacing, 150);
+        levels[2*i] = levels[2*i+1]= ofRandom(-100,100);
+    }
+    audioStrip.setVertexData(audioSamples, bufferSize*2, GL_STATIC_DRAW);
+    audioStrip.setAttributeData(audioAttribLocation, levels, 1,2*bufferSize, GL_DYNAMIC_DRAW);
+}
+
+void testApp::audioIn(float * input, int bufferSize, int nChannels)
+{
+    //lets go through each sample and calculate the root mean square which is a rough way to calculate volume
+    for (int i = 0; i < bufferSize; i++)
+    {
+        left[2*i] = left[2*i+1]  = input[i]*1800;
+        levels[2*i+1] = levels[2*i] = left[2*i];
+    }
+}
+
+//--------------------------------------------------------------
+void testApp::keyPressed(int key)
+{
+    switch(key)
+    {
+        case 'f':
+            ofToggleFullscreen();
+            initSprites(); //re-init sprites with propersizing
+        break;
+        default:
+        break;
+    }
 }
 
 //--------------------------------------------------------------

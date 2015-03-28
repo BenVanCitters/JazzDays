@@ -57,6 +57,17 @@ public:
     int hCount;
     int vCount;
     string letterOrder;
+    
+    
+    ///audio stuff
+    void soundSetup();
+    void audioIn(float * input, int bufferSize, int nChannels);
+    vector <float> left;
+    ofVec2f* audioSamples;
+    ofSoundStream soundStream;
+    ofVbo audioStrip;
+    float* levels;
+    int audioAttribLocation;
 };
 
 #endif
