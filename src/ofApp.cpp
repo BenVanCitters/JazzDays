@@ -10,6 +10,8 @@ void testApp::setup(){
     
     camWidth 		= 640;	// try to grab at this size.
     camHeight 		= 480;
+    hCount = 100;
+    vCount = 70;
     
     vidGrabber.setVerbose(true);
     vidGrabber.initGrabber(camWidth,camHeight);

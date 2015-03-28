@@ -54,8 +54,8 @@ public:
     
     string asciiCharacters;
     ofTrueTypeFont  font;
-    int hCount = 100;
-    int vCount = 70;
+    int hCount;
+    int vCount;
 };
 
 #endif
