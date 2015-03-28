@@ -8,7 +8,7 @@ bool sortVertically(  basicSprite * a, basicSprite * b ) {
 //--------------------------------------------------------------
 void testApp::setup()
 {
-    
+    spriteRenderer = NULL;
     camWidth 		= 640;	// try to grab at this size.
     camHeight 		= 480;
     hCount = 100;
@@ -48,26 +48,32 @@ void testApp::setup()
     charToIndexMap['x']=88; charToIndexMap['y']=89; charToIndexMap['z']=90; charToIndexMap['{']=91;
     charToIndexMap['|']=92; charToIndexMap['}']=93; charToIndexMap['~']=94;
     
-    initSprites();
+    initSprites(100,70);
     letterOrder = " .-_':,;^~=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
 //" !\"#$%&'()*+_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
 //    string s =         " !\"#$%&'()*+,_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
 //    soundSetup();
 }
 
-void testApp::initSprites()
+void testApp::initSprites(int w, int h)
 {
+    hCount = w;
+    vCount = h;
     sprites.clear();
     //declare a new renderer with 1 layer, 10000 tiles per layer, default layer of 0, tile size of 'sidLen'
     float sideLen = 256/10.f;
+    if(spriteRenderer != NULL)
+    {
+        delete spriteRenderer;
+    }
     spriteRenderer = new ofxSpriteSheetRenderer(1, hCount*vCount, 0, sideLen);
     
     // load the spriteSheetExample.png texture of size 256x256 into the sprite sheet. set it's scale mode to nearest since it's pixel art
     spriteRenderer->loadTexture("m.png", 256, GL_LINEAR);
     
     string s = " !\"#$%&'()*+_@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
-    float scalingX = ofGetWindowWidth()*1.f/hCount;
-    float scalingY = ofGetWindowHeight()*1.f/vCount;
+    float scalingX = ofGetScreenWidth()*1.f/hCount;
+    float scalingY = ofGetScreenHeight()*1.f/vCount;
     for(int i=0;i<hCount;i++)
     {
         for(int j=0;j<vCount;j++)
@@ -93,6 +99,8 @@ void testApp::initSprites()
 //--------------------------------------------------------------
 void testApp::update()
 {
+//    initSprites((int)(100*(1+sin(ofGetElapsedTimef()))/2 + 25),50*(int)(75*(1+sin(ofGetElapsedTimef()/6.f + 4)/2) + 25));
+    
     vidGrabber.update();
     ofPixelsRef pixelsRef = vidGrabber.getPixelsRef();
     //get min/max of brightness
@@ -146,7 +154,7 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw()
 {
-    ofBackground(255, 0, 0);
+    ofBackground(0, 0, 0);
     spriteRenderer->draw(); //draw the sprites!
     
     spriteRenderer->frameBuffer.draw(0,0);
@@ -195,7 +203,7 @@ void testApp::keyPressed(int key)
     {
         case 'f':
             ofToggleFullscreen();
-            initSprites(); //re-init sprites with propersizing
+            initSprites(100,70); //re-init sprites with propersizing
         break;
         default:
         break;

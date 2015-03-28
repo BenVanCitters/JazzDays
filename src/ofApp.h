@@ -42,7 +42,7 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
     void windowResized(int w, int h);
-    void initSprites();
+    void initSprites(int w, int h);
     
     ofxSpriteSheetRenderer * spriteRenderer;	// our spriteRenderer
     vector<basicSprite *> sprites;				// our vector of sprites
