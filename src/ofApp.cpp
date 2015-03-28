@@ -19,7 +19,7 @@ void testApp::setup()
     vidGrabber.setVerbose(true);
     vidGrabber.initGrabber(camWidth,camHeight);
     
-    ofSetFrameRate(50); //lets run at 30 fps!
+    ofSetFrameRate(30); //lets run at 30 fps!
     
     ofEnableAlphaBlending(); // turn on alpha blending. important!
     charToIndexMap.clear();
@@ -52,7 +52,7 @@ void testApp::setup()
     letterOrder = " .-_':,;^~=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
 //" !\"#$%&'()*+_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_abcdefghijklmnopqrstuvwxyz{|}~"
 //    string s =         " !\"#$%&'()*+,_./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~";
-    soundSetup();
+//    soundSetup();
 }
 
 void testApp::initSprites()
