@@ -46,7 +46,16 @@ public:
     
     ofxSpriteSheetRenderer * spriteRenderer;	// our spriteRenderer
     vector<basicSprite *> sprites;				// our vector of sprites
-    map<int,int> letterMap;
+    map<char,int> charToIndexMap;
+
+    ofVideoGrabber 		vidGrabber;
+    int 				camWidth;
+    int 				camHeight;
+    
+    string asciiCharacters;
+    ofTrueTypeFont  font;
+    int hCount = 100;
+    int vCount = 70;
 };
 
 #endif
