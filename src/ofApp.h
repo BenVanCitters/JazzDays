@@ -68,6 +68,9 @@ public:
     void audioIn(float * input, int bufferSize, int nChannels);
     vector <float> left;
     
+
+    ofTexture myTexture;
+    ofImage myImage;
     ofSoundStream soundStream;
     ofVbo audioStrip;
     float* levels;

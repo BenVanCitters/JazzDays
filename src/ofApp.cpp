@@ -17,11 +17,15 @@ void testApp::setup()
     camHeight 		= 480;
     hCount = 100;
     vCount = 70;
-    
-    ofHideCursor();
-    ofEnableNormalizedTexCoords();
+    ofDisableArbTex();
+//    ofLoadImage(myTexture, "scr.png");
+    ofEnableArbTex();
+    myImage.loadImage("scr.png");
+//    ofHideCursor();
+//    ofEnableNormalizedTexCoords();
     
     vidGrabber.setVerbose(true);
+    vidGrabber.setUseTexture(true);
     vidGrabber.initGrabber(camWidth,camHeight);
     
     ofSetFrameRate(30); //lets run at 30 fps!
@@ -131,8 +135,7 @@ void testApp::update()
             lightness -= minVBright;
             lightness *= brightDiff;
             int charIndex = (int)(lightness*(letterOrder.length()-1));
-            
-            //set the sprite to match the brightness
+                            //set the sprite to match the brightness
             sprites[i]->animation.index = charToIndexMap[letterOrder[charIndex]];
             
             // add them to the sprite renderer (add their animation at their position, there are a lot more options for what could
@@ -148,33 +151,59 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw()
 {
-    ofBackground(0, 0, 0,255);
+    ofBackground(255,255,255,255);
     spriteRenderer->draw(); //draw the sprites!
     
 //    spriteRenderer->frameBuffer.draw(0,0);
 //    spriteRenderer->texture->draw(0, 0);
-    
+
     int count = spriteRenderer->frameBuffer.getNumTextures();
     if(count > 0)
     {
+        ofTexture texRef = vidGrabber.getTextureReference();// = *spriteRenderer->texture; //
+        //        ofLoadImage(texRef, vidGrabber);
+        texRef.bind();
         audioShader.begin();
         
 //        ofTexture texRef = spriteRenderer->t;//  //fingerMovie.getTextureReference();
 //        texRef.setTextureWrap(GL_REPEAT, GL_REPEAT);
-        vidGrabber.update();
-        ofTexture texRef = vidGrabber.getTextureReference();
-        texRef.setTextureWrap(GL_REPEAT, GL_REPEAT);
+       
+       
+//        texRef.bind();
+//        texRef.setTextureWrap(GL_REPEAT, GL_REPEAT);
 
-        audioShader.setUniformTexture("mytex",spriteRenderer->frameBuffer.getTextureReference(), 0);
+        audioShader.setUniformTexture("tex",texRef, 0);
+//        audioShader.setUniformTexture("mytex",texRef, 0);
+//        audioShader.setUniformTexture("mytex",spriteRenderer->frameBuffer.getTextureReference(), 0);
 //        glBindTexture(        audioShader.getAttributeLocation("myTex"), spriteRenderer->frameBuffer.getTextureReference());
-        audioShader.setUniform1f("time", ofGetElapsedTimef());
-        audioStrip.draw(GL_TRIANGLE_STRIP, 0, 6*100*100);
+        
+//        audioShader.setUniform1f("time", ofGetElapsedTimef());
+        audioStrip.draw(GL_TRIANGLES, 0, ofGetMouseY()* 200.f/ofGetWindowHeight());
 //        audioStrip.drawElements(GL_TRIANGLE_STRIP, 6*100*100);
         
         //ofRect(0,-20, drawWidth/2,100);
-        //ofRect(50,150, drawWidth/2-50,150);
+        //ofRect(50,150, ofGetScreenWidth()/2-50,150);
+        
+        
         audioShader.end();
+        
+        texRef.unbind();
+
+        ofPlanePrimitive plane;
+        ofTexture tempTex = myImage.getTextureReference();///spriteRenderer->frameBuffer.getTextureReference();
+        bool b = vidGrabber.isInitialized();
+//        vidGrabber.draw(0,0);
+        
+//        if(tempTex != NULL)
+        {
+            tempTex.bind();
+            
+            plane.mapTexCoordsFromTexture(tempTex);
+            plane.draw();
+            tempTex.unbind();
+        }
     }
+
 }
 
 
@@ -197,17 +226,20 @@ void testApp::setupFlagVerts()
 {
 //    int bufferSize = 256;
     
-    int vertsAcross = 100;
-    int vertsDown = 100;
+    int vertsAcross = 5;
+    int vertsDown = 5;
     int totalVerts = vertsAcross*vertsDown*6;
     ofVec3f* flagVerts = new ofVec3f[totalVerts];
     ofVec2f* flagTexCoords = new ofVec2f[totalVerts];
     float* flagTexCoordsX = new float[totalVerts*2];
     float* flagTexCoordsY = new float[totalVerts*2];
     
-    float hSpacing = ofGetScreenWidth() *1.f/vertsAcross;;
-    float vSpacing = ofGetScreenWidth() *1.f/vertsDown;;
+    float hSpacing = ofGetScreenWidth() *1.f/vertsAcross;
+    float vSpacing = ofGetScreenHeight() *1.f/vertsDown;
 
+    int curIndex = 0;
+
+    
     for(int j = 0; j < vertsDown; j++)
     {
         for(int i = 0; i < vertsAcross; i++)
@@ -244,6 +276,11 @@ void testApp::setupFlagVerts()
             flagTexCoordsX[curIndex+5] =i*1.f/vertsAcross;
             flagTexCoordsY[curIndex+5] =(j+1)*1.f/vertsDown;
         }
+    }
+    
+    for(int i = 0; i < totalVerts; i++)
+    {
+        cout << flagVerts[i] << endl;
     }
     audioStrip.setVertexData(flagVerts, totalVerts, GL_STATIC_DRAW);
     audioStrip.setTexCoordData(flagTexCoords, totalVerts, GL_STATIC_DRAW);
